@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/iris-contrib/middleware/cors"
 	R "github.com/mirzafaizan/gom-api/controllers"
 
 	"github.com/kataras/iris/v12"
@@ -12,6 +13,11 @@ import (
 
 func main() {
 	app := iris.New()
+	crs := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "POST", "DELETE"},
+	})
+	app.Use(crs)
 	app.Logger().SetLevel("debug")
 	// Optionally, add two built'n handlers
 	// that can recover from any http-relative panics
@@ -26,6 +32,7 @@ func main() {
 	})
 
 	// API endpoints
+	app.AllowMethods(iris.MethodOptions)
 	api := app.Party("/api")
 	{
 		api.Post("/signup", R.CreateUser)
