@@ -13,7 +13,7 @@ import (
 )
 
 // DB connection
-var DB = Config.DB().Database("admin-dashboard").Collection("users")
+var DB = Config.DB().Database("bankfinal").Collection("employee")
 
 func handleErr(ctx iris.Context, err error) {
 	ctx.JSON(iris.Map{"response": err.Error()})
@@ -59,7 +59,7 @@ func GetUser(ctx iris.Context) {
 	msisdn := ctx.Params().Get("msisdn")
 
 	result := Models.User{}
-	err := DB.FindOne(context.TODO(), bson.D{primitive.E{Key: "username", Value: msisdn}}).Decode(&result)
+	err := DB.FindOne(context.TODO(), bson.D{primitive.E{Key: "name", Value: msisdn}}).Decode(&result)
 	if err != nil {
 		handleErr(ctx, err)
 		return
