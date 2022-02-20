@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+
 	Config "github.com/mirzafaizan/gom-api/config"
 	Models "github.com/mirzafaizan/gom-api/models"
 
@@ -10,7 +11,7 @@ import (
 )
 
 // DB connection
-var dbLoan = Config.DB().Database("bankfinal").Collection("Loan")
+var dbLoan = Config.DB().Database("admin-dashboard").Collection("Loan")
 
 func handleErr1(ctx iris.Context, err error) {
 	ctx.JSON(iris.Map{"response": err.Error()})
