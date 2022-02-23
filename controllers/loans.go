@@ -1,13 +1,10 @@
 package controllers
 
 import (
-	"context"
-
-	Config "github.com/mirzafaizan/gom-api/config"
-	Models "github.com/mirzafaizan/gom-api/models"
-
 	"github.com/kataras/iris/v12"
+	Config "github.com/mirzafaizan/gom-api/config"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // DB connection
@@ -18,31 +15,43 @@ func handleErr1(ctx iris.Context, err error) {
 }
 
 func GetAllLoans(ctx iris.Context) {
-	var results = []*Models.Loans{}
-	c := context.TODO()
-	// Passing bson.D{{}} as the filter matches all documents in the collection
-	cur, err := dbLoan.Find(c, bson.D{{}})
+	groupStage := bson.D{{"$group", bson.D{{"_id", "$loan_status"}, {"total", bson.D{{"$sum", "$amount"}}}}}}
+
+	showInfoCursor, err := dbLoan.Aggregate(ctx, mongo.Pipeline{groupStage})
+	if err != nil {
+		panic(err)
+	}
+	var showsWithInfo []bson.M
+	if err = showInfoCursor.All(ctx, &showsWithInfo); err != nil {
+		panic(err)
+	}
+
+	//j, _ := json.MarshalIndent(showsWithInfo, "", " ")
+	//log.Println(string(j))
+
 	if err != nil {
 		handleErr1(ctx, err)
 		return
 	}
-	// Finding multiple documents returns a cursor
-	// Iterating through the cursor allows us to decode documents one at a time
-	for cur.Next(c) {
-		// create a value into which t he single document can be decoded
-		var elem Models.Loans
-		err := cur.Decode(&elem)
-		if err != nil {
-			handleErr1(ctx, err)
-			return
-		}
-		results = append(results, &elem)
+
+	ctx.JSON(iris.Map{"response": showsWithInfo})
+
+}
+
+func CountLoans(ctx iris.Context) {
+	//db.Loan.find({loan_status : 1}).count()
+	query1 := bson.A{bson.D{{"$match", bson.D{{"loan_status", 1}}}}, bson.D{{"$count", "count"}}}
+	facetStage := bson.D{{"$facet", bson.D{{"query1", query1}}}}
+
+	showInfoCursor, err := dbLoan.Aggregate(ctx, mongo.Pipeline{facetStage})
+	if err != nil {
+		panic(err)
 	}
-	if err := cur.Err(); err != nil {
-		handleErr1(ctx, err)
-		return
+	var showsWithInfo []bson.M
+	if err = showInfoCursor.All(ctx, &showsWithInfo); err != nil {
+		panic(err)
 	}
-	// Close the cursor once finished
-	cur.Close(c)
-	ctx.JSON(iris.Map{"response": results})
+
+	ctx.JSON(iris.Map{"response": showsWithInfo})
+
 }

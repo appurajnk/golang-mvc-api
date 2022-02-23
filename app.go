@@ -20,7 +20,7 @@ func main() {
 	app.Use(crs)
 	app.Logger().SetLevel("debug")
 	// Optionally, add two built'n handlers
-	// that can recover from any http-relative panics
+	// that can recover from any http-relative panicsR
 	// and log the requests to the terminal.
 	app.Use(recover.New())
 	app.Use(logger.New())
@@ -40,6 +40,7 @@ func main() {
 		api.Get("/getusers", R.GetAllUsers)
 		api.Get("/users/{msisdn}", R.GetUser)
 		api.Get("/loans", R.GetAllLoans)
+		api.Get("/loantotal", R.CountLoans)
 	}
 
 	app.Listen(os.Getenv("PORT"))
