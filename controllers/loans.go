@@ -15,7 +15,7 @@ func handleErr1(ctx iris.Context, err error) {
 }
 
 func GetAllLoans(ctx iris.Context) {
-	groupStage := bson.D{{"$group", bson.D{{"_id", "$loan_status"}, {"total", bson.D{{"$sum", "$amount"}}}}}}
+	groupStage := bson.D{{"$group", bson.D{{"_id", "$product"}, {"total", bson.D{{"$sum", "$amount"}}}}}}
 
 	showInfoCursor, err := dbLoan.Aggregate(ctx, mongo.Pipeline{groupStage})
 	if err != nil {
@@ -50,6 +50,29 @@ func CountLoans(ctx iris.Context) {
 	var showsWithInfo []bson.M
 	if err = showInfoCursor.All(ctx, &showsWithInfo); err != nil {
 		panic(err)
+	}
+
+	ctx.JSON(iris.Map{"response": showsWithInfo})
+
+}
+
+func PortfolioOutstanding(ctx iris.Context) {
+	groupStage := bson.D{{"$group", bson.D{{"_id", "$loan_status"}, {"total", bson.D{{"$sum", "$amount"}}}}}}
+	showInfoCursor, err := dbLoan.Aggregate(ctx, mongo.Pipeline{groupStage})
+	if err != nil {
+		panic(err)
+	}
+	var showsWithInfo []bson.M
+	if err = showInfoCursor.All(ctx, &showsWithInfo); err != nil {
+		panic(err)
+	}
+
+	//j, _ := json.MarshalIndent(showsWithInfo, "", " ")
+	//log.Println(string(j))
+
+	if err != nil {
+		handleErr1(ctx, err)
+		return
 	}
 
 	ctx.JSON(iris.Map{"response": showsWithInfo})

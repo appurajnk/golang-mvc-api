@@ -41,6 +41,7 @@ func main() {
 		api.Get("/users/{msisdn}", R.GetUser)
 		api.Get("/loans", R.GetAllLoans)
 		api.Get("/loantotal", R.CountLoans)
+		api.Get("/outstanding", R.PortfolioOutstanding)
 	}
 
 	app.Listen(os.Getenv("PORT"))
