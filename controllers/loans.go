@@ -76,5 +76,4 @@ func PortfolioOutstanding(ctx iris.Context) {
 	}
 
 	ctx.JSON(iris.Map{"response": showsWithInfo})
-
 }
